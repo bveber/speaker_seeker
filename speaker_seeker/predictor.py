@@ -14,7 +14,7 @@ def build_training_set(path):
         print(character_filename, '\n', character_dataset.shape)
         training_dataset = np.append(training_dataset, character_dataset)
         label = np.zeros(len(training_files))
-        label[i + 1] = 1
+        label[i] = 1
         training_labels = np.append(training_labels, label)
     training_dataset, training_labels = randomize(training_dataset, training_labels)
     return training_dataset, training_labels
