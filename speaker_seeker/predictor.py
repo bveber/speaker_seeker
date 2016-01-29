@@ -17,7 +17,11 @@ def build_training_set(path):
         label[i] = 1
         training_labels = np.append(training_labels, label)
     training_dataset, training_labels = randomize(training_dataset, training_labels)
-    return training_dataset, training_labels
+    valid_dataset = training_dataset[10000:]
+    valid_labels = training_labels[10000:]
+    training_dataset = training_dataset[:10000]
+    training_labels = training_labels[:10000]
+    return training_dataset, training_labels, valid_dataset, valid_labels
 
 def randomize(dataset, labels):
     np.random.seed(42)
