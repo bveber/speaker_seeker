@@ -7,15 +7,16 @@ import numpy as np
 
 def build_training_set(path):
     training_files = os.listdir(path)
-    training_dataset = []
-    training_labels = []
     for i, character_filename in enumerate(training_files):
         character_dataset = ss.audio_processor.get_features_parallel(os.path.join(path, character_filename))
-        print(character_filename, '\n', character_dataset.shape)
-        training_dataset = np.append(training_dataset, character_dataset)
-        label = np.zeros(len(training_files))
-        label[i] = 1
-        training_labels = np.append(training_labels, label)
+        labels = np.zeros((len(character_dataset), (training_files)))
+        labels[:, i] = 1
+        if i == 0:
+            training_dataset = character_dataset
+            training_labels = labels
+        else:
+            training_dataset = np.vstack((training_dataset, character_dataset))
+            training_labels = np.vstack((training_labels, labels))
     training_dataset, training_labels = randomize(training_dataset, training_labels)
     valid_dataset = training_dataset[10000:]
     valid_labels = training_labels[10000:]
