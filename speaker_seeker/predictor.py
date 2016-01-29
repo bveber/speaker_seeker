@@ -5,14 +5,27 @@ import os
 import numpy as np
 
 
-def main(path):
+def build_training_set(path):
     training_files = os.listdir(path)
-    training_set = []
-    for character_filename in training_files:
+    training_dataset = []
+    training_labels = []
+    for i, character_filename in enumerate(training_files):
         character_dataset = ss.audio_processor.get_features_parallel(os.path.join(path, character_filename))
         print(character_filename, '\n', character_dataset.shape)
-        training_set = np.append(training_set, character_dataset)
-    print(training_set.shape)
+        training_dataset = np.append(training_dataset, character_dataset)
+        label = np.zeros(len(training_files))
+        label[i + 1] = 1
+        training_labels = np.append(training_labels, label)
+        training_dataset, training_labels = randomize(training_dataset, training_labels)
+    return training_dataset, training_labels
+
+def randomize(dataset, labels):
+    np.random.seed(42)
+    permutation = np.random.permutation(labels.shape[0])
+    shuffled_dataset = dataset[permutation, :, :]
+    shuffled_labels = labels[permutation]
+    return shuffled_dataset, shuffled_labels
+
 
 # train_dataset, train_labels = reformat(train_dataset, train_labels)
 # valid_dataset, valid_labels = reformat(valid_dataset, valid_labels)
