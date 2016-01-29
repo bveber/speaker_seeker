@@ -28,7 +28,7 @@ def get_features(wav_filename, overlap=True, model=False):
     #Convert from stereo to mono
     if len(data.shape) > 1:
         data = data.sum(axis=1) / 2
-    frameLength = rate / fps
+    frameLength = np.floor(rate / fps)
     index = 0
     samples = []
     b, a = butter(6, [300 / (rate / 2), 4000 / (rate / 2)], btype='band')
@@ -65,11 +65,14 @@ def get_features_parallel(wav_filename, overlap=True, model=False):
     d = 40
     rate, data = wavfile.read(wav_filename)
     if model and 'Simpsons_' in wav_filename:
-        data = data[:int(len(data) / 5)]
+        np.random.seed(42)
+        permutation = np.random.permutation(data.shape[0])
+        data = data[permutation]
+        data = data[:len(data) / 10]
     #Convert from stereo to mono
     if len(data.shape) > 1:
         data = data.sum(axis=1) / 2
-    frameLength = rate / fps
+    frameLength = np.floor(rate / fps)
     index = 0
     b, a = butter(6, [300 / (rate / 2), 4000 / (rate / 2)], btype='band')
     data = lfilter(b, a, data)
@@ -121,7 +124,13 @@ def mfcc_features(signal, num_coefficients, sample_rate):
     power_spectrum = abs(complex_spectrum) ** 2
     mfb = mel_filter_bank(sample_rate / fps, num_coefficients, minimum_frequency, maximum_frequency)
     filtered_spectrum = np.dot(power_spectrum, mfb)
-    log_spectrum = np.log(filtered_spectrum)
+    log_spectrum = []
+    for value in filtered_spectrum:
+        if value <= 0:
+            log_spectrum.append(-10)
+        else:
+            log_spectrum.append(np.log(value))
+    log_spectrum = np.array(log_spectrum)
     dct_spectrum = dct(log_spectrum, type=2)  # MFCC :)
     for i, elem in enumerate(dct_spectrum):
         if elem > 10 ** 8:
