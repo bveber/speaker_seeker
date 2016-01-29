@@ -9,7 +9,7 @@ def build_training_set(path):
     training_files = os.listdir(path)
     for i, character_filename in enumerate(training_files):
         character_dataset = ss.audio_processor.get_features_parallel(os.path.join(path, character_filename))
-        labels = np.zeros((len(character_dataset), (training_files)))
+        labels = np.zeros((len(character_dataset), len(training_files)))
         labels[:, i] = 1
         if i == 0:
             training_dataset = character_dataset
