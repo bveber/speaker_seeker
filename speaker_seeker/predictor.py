@@ -22,7 +22,7 @@ def build_training_set(path):
 def randomize(dataset, labels):
     np.random.seed(42)
     permutation = np.random.permutation(labels.shape[0])
-    shuffled_dataset = dataset[permutation, :, :]
+    shuffled_dataset = dataset[permutation, :]
     shuffled_labels = labels[permutation]
     return shuffled_dataset, shuffled_labels
 
