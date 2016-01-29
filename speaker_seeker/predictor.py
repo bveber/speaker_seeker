@@ -16,7 +16,7 @@ def build_training_set(path):
         label = np.zeros(len(training_files))
         label[i + 1] = 1
         training_labels = np.append(training_labels, label)
-        training_dataset, training_labels = randomize(training_dataset, training_labels)
+    training_dataset, training_labels = randomize(training_dataset, training_labels)
     return training_dataset, training_labels
 
 def randomize(dataset, labels):
