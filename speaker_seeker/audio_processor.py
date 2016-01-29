@@ -6,8 +6,9 @@ import multiprocessing
 from joblib import Parallel, delayed
 ###Scientific + Math packages
 from scipy.io import wavfile
-from scipy.signal import butter, lfilter
+from scipy.signal import butter, lfilter, wiener, gaussian
 from scipy.fftpack import dct
+from scipy.ndimage import filters
 import numpy as np
 
 __author__ = 'Brandon'
@@ -52,7 +53,7 @@ def get_features(wav_filename, overlap=True, model=False):
             else:
                 samples = np.vstack((samples, np.zeros(d)))
         if overlap:
-            index += int(frameLength / 2)
+            index += np.floor(frameLength / 2)
         else:
             index += frameLength
     print("%-23s%5.2f%-3s" % ('getFeature Runtime is: ', time.time()-t0, '(s)'))
@@ -78,9 +79,12 @@ def get_features_parallel(wav_filename, overlap=True, model=False):
     data = lfilter(b, a, data)
     frameArray = []
     while index < len(data) - frameLength:
+        b = gaussian(39, 10)
+        # frameArray.append(wiener(data[index:index + frameLength], 10, .1))
+        # frameArray.append(filters.convolve1d(data[index:index + frameLength], b/b.sum()))
         frameArray.append(data[index:index + frameLength])
         if overlap:
-            index += int(frameLength / 2)
+            index += np.floor(frameLength / 2)
         else:
             index += frameLength
     samples = Parallel(n_jobs=num_cores, verbose=1)(delayed(get_features_subroutine)(frame, d, rate, frameLength)
@@ -92,7 +96,6 @@ def get_features_parallel(wav_filename, overlap=True, model=False):
 def get_features_subroutine(frame, d, rate, frameLength):
     if np.abs(frame).sum() > 0:
         frame = frame / max(frame)
-        #frameData = wiener(data[index:index+frameLength],29)
         frame = frame * np.hamming(frameLength)
         features = mfcc_features(frame, d, rate)
 ##        if len(samples)==0: samples = MFCC(frame,d,rate)#samples=fft(frame,d)
@@ -117,7 +120,6 @@ def fft(frame, d):
 
 
 def mfcc_features(signal, num_coefficients, sample_rate):
-    #num_coefficients = 20 # choose the sive of mfcc array
     minimum_frequency = 300
     maximum_frequency = 4000
     complex_spectrum = np.fft.fft(signal)

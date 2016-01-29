@@ -1,1 +1,4 @@
 .idea
+training_files
+wav_files
+__pycache__
