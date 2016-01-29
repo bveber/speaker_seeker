@@ -9,7 +9,7 @@ def main(path):
     training_files = os.listdir(path)
     training_set = []
     for character_filename in training_files:
-        character_dataset = ss.audio_processor.get_features_parallel(character_filename)
+        character_dataset = ss.audio_processor.get_features_parallel(os.path.join(path, character_filename))
         print(character_filename, '\n', character_dataset.shape)
         training_set = np.append(training_set, character_dataset)
     print(training_set.shape)
