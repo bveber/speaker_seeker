@@ -80,14 +80,14 @@ def build_training_set(path):
             all_characters_labels = np.vstack((all_characters_labels, character_labels))
     characters_mean = all_characters_dataset.mean(axis=0)
     characters_std = all_characters_dataset.std(axis=0)
-    average_character = np.random.normal(characters_mean, characters_std,
+    average_character = np.random.normal(characters_mean, 1 * characters_std,
                                          (int(np.floor(len(all_characters_dataset)/len(label_columns))),
                                           all_characters_dataset.shape[1]))
     average_labels = np.zeros((len(average_character), len(training_files) + 1))
     average_labels[:, -1] = 1
     label_columns.append('Average')
-    training_dataset = np.vstack((all_characters_dataset, model_dataset, average_character))
-    training_labels = np.vstack((all_characters_labels, model_labels, average_labels))
+    training_dataset = np.vstack((all_characters_dataset, average_character))
+    training_labels = np.vstack((all_characters_labels, average_labels))
     training_dataset, training_labels = randomize(training_dataset, training_labels)
     train_index = np.floor(len(training_dataset) * .8)
     valid_dataset = training_dataset[train_index:]
@@ -112,14 +112,15 @@ def accuracy(predictions, labels):
 
 def fit(train_dataset, train_labels, valid_dataset, valid_labels, test_dataset):
     scaler = preprocessing.StandardScaler()
+    print(train_dataset.max(axis=0))
     train_dataset = scaler.fit_transform(train_dataset)
     valid_dataset = scaler.transform(valid_dataset)
     test_dataset = scaler.transform(test_dataset)
     num_labels = train_labels.shape[1]
     num_features = train_dataset.shape[1]
-    hidden_units_1 = 1024
-    hidden_units_2 = 300
-    hidden_units_3 = 50
+    hidden_units_1 = 512
+    hidden_units_2 = 128
+    hidden_units_3 = 64
 
     graph = tf.Graph()
     with graph.as_default():
@@ -145,7 +146,7 @@ def fit(train_dataset, train_labels, valid_dataset, valid_labels, test_dataset):
         'b3': tf.Variable(tf.zeros([hidden_units_3])),
         'out': tf.Variable(tf.zeros([num_labels]))
             }
-        beta = tf.constant(.001)
+        beta = tf.constant(.00001)
         keep_prob = tf.constant(1.0)
 
         # Training computation.
